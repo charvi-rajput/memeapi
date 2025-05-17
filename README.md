@@ -1,2 +1,2 @@
-# **Music API**
-GET, POST, DELETE song playlists/ playlist.
+# **Meme Meister API**
+GET, CREATE, UPDATE & DELETE memes.
