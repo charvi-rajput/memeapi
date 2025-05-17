@@ -1,0 +1,227 @@
+openapi: "3.0.4"
+
+info:
+  version: "0.3.0"
+  title: Meme Meister Service
+  description: This is a sample Meme Meister API.
+
+servers:
+  - url: https://dev.mememeister.com/v1
+
+tags:
+  - name: Meme Library
+    description: Get, Create, Update & Delete Memes.
+    externalDocs:
+      description: More Info
+      url: https://dev.mememeister.com/v1/yourlibrary
+  
+
+paths:
+  /meme:
+    post:
+      operationId: postmemes
+      security:
+        - oauthFacebook:
+            - read
+      description: Create a new meme.
+      tags:
+        - Meme Library
+      parameters:
+        - name: topcaption
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Top Caption for meme. 
+        - name: bottomcaption
+          in: query
+          required: false
+          schema:
+            type: string
+          description: Bottom Caption for meme.
+      requestBody:
+        description: Image for the meme.
+        required: true
+        content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+
+      responses:
+        200:
+          description: Meme generated successfully!
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+            image/gif:
+              schema:
+                type: string
+                format: binary
+
+
+    get:
+      operationId: getmemes
+      security:
+        - oauthFacebook:
+            - read
+      description: Gets your meme id & captions.
+      tags:
+        - Meme Library
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+          description:  Filter or search for specific items or data.
+
+      responses:
+        200:
+          description: Memes retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/memeinfo"
+
+  /meme/{meme-id}:
+    get:
+      operationId: getspecmeme
+      security:
+        - oauthFacebook:
+            - read
+      description: Gets a specific meme using meme-id.
+      tags:
+        - Meme Library
+      parameters:
+        - name: meme-id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Successful response
+          content:
+            image/jpeg:
+              schema:
+                type: string
+                format: binary
+
+    put:
+      operationId: updatesspecmeme
+      security:
+        - oauthFacebook:
+            - read
+      description: Updates a specific meme using meme-id.
+      tags:
+        - Meme Library
+      parameters:
+        - name: meme-id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        description: New updates to the meme.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/memeupdate"
+      responses:
+        200:
+          description: Successfully Updated!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/memeinfo"
+
+    delete:
+      operationId: deletememe
+      security:
+        - oauthFacebook:
+            - read
+      description: Deletes a meme.
+      tags:
+        - Meme Library
+      parameters:
+        - name: meme-id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        200:
+          description: Successfully Deleted.
+        401:
+          description: Already Deleted!
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/error"
+
+
+components:
+  schemas:
+    memeinfo:
+      type: object
+      properties:
+        id:
+          type: integer
+        topcaption:
+          type: string
+        bottomcaption:
+            type: string
+      required:
+        - id
+        - topcaption
+        - bottomcaption
+        
+    memeupdate:
+      type: object
+      properties:
+        topcaption:
+          type: string
+        bottomcaption:
+            type: string
+      required:
+        - topcaption
+        - bottomcaption
+
+    error:
+      type: object
+      properties:
+        errormsg:
+          type: string
+              
+              
+  securitySchemes:
+    oauthFacebook:
+      type: oauth2
+      description: OAuth2 security scheme using authorization code flow
+      flows:
+        authorizationCode:
+          authorizationUrl: https://dev.facebook.com/oauth/authenticate
+          tokenUrl: https://dev.mememeister.com/oauth/token
+          scopes:
+            read: Read memes in your account
+            write: Modify memes in your account
+security:
+  - oauthFacebook:
+      - read
+      - write
